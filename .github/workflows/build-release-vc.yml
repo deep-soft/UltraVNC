@@ -1,4 +1,4 @@
-# 2024-02-11 09:50
+# 2024-08-09 16:30
 name: Build release VC
 
 on:
@@ -6,45 +6,40 @@ on:
 #    branches: [ master ]
 #  pull_request:
 #    branches: [ master ]
-  workflow_dispatch:
-    inputs:
-      patch_create_folders:
-        default: true
-        type: boolean
-      patch_vcx:
-        default: false
-        type: boolean
-      patch_vcx_sign:
-        default: true
-        type: boolean
+  workflow_dispatch:    
 
 env:
   PRG_NAME: "uvnc"
   TAG_NAME: "uvnc-release"
   TAG_BUILD: "-b"
   TAG_REF: "0000000"
-  uvnc_version: "1.4.3.0"
+  uvnc_version: "1.5.0.2"
 
 jobs:
 #------------------------------------------------------------------------------
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
         build: [ 
+#                 msbuild_cl_x64_debug,
                  msbuild_cl_x64_release,
+#                 msbuild_cl_x86_debug,
                  msbuild_cl_x86_release,
+#                 msbuild_cl_ARM64_release,
                ]
   
         include:
+#          - { build: msbuild_cl_x64_debug,     compiler: msbuild_cl, arch: amd64,       platform_sln: x64,   platform_name: x64,   build_config: Debug }
           - { build: msbuild_cl_x64_release,   compiler: msbuild_cl, arch: amd64,       platform_sln: x64,   platform_name: x64,   build_config: Release }
+#          - { build: msbuild_cl_x86_debug,     compiler: msbuild_cl, arch: amd64_x86,   platform_sln: Win32, platform_name: x86,   build_config: Debug }
           - { build: msbuild_cl_x86_release,   compiler: msbuild_cl, arch: amd64_x86,   platform_sln: Win32, platform_name: x86,   build_config: Release }
 #          - { build: msbuild_cl_ARM64_release, compiler: msbuild_cl, arch: amd64_arm64, platform_sln: ARM64, platform_name: ARM64, build_config: Release }
 
     steps:
       - name: Checkout source
-        uses: deep-soft/checkout@v4
+        uses: deep-soft/checkout@v3
 
       - name: Get ref, set build version
         shell: bash
@@ -74,7 +69,15 @@ jobs:
           uvnc_build=${{ env.TAG_BUILD }};
           #uvnc_build=$(cat "far/vbuild.m4");
           #uvnc_build=$(grep -R "FILEVERSION " | grep winvnc/winvnc.rc | awk "{print $2}" | tr , .);
-          uvnc_version_rc=$(grep FILEVERSION vncviewer/res/vncviewer.rc | awk '{print $2}' | tr , .);
+
+          uvnc_APS_MAJORNUMBER=$(grep APS_MAJORNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_MINORNUMBER=$(grep APS_MINORNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_BUILDNUMBER=$(grep APS_BUILDNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_MODIFICATIONNUMBER=$(grep APS_MODIFICATIONNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_DATEYEAR=$(grep APS_DATEYEAR common/versionServerViewer.inc | awk '{print $3}');
+
+          uvnc_version_rc=$uvnc_APS_MAJORNUMBER.$uvnc_APS_MINORNUMBER.$uvnc_APS_BUILDNUMBER.$uvnc_APS_MODIFICATIONNUMBER.$uvnc_APS_DATEYEAR;
+
           if [ ! $uvnc_version_rc == "" ]; then
             uvnc_version=$uvnc_version_rc;
             echo "uvnc_version_rc=$uvnc_version_rc";
@@ -89,22 +92,10 @@ jobs:
           echo "Print program version"
           echo ${{ env.VERSION }}
 
-      - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
-        shell: powershell
-        run: |
-          $VS_BTOOLS_EXE="vs_buildtools.exe"
-          $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
-          Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
-          Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
-          "--add", "Microsoft.VisualStudio.Component.VC.140", `
-          "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-          "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
-
       - name: Set MSVC environment
         uses: deep-soft/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
-          sdk: 8.1
 
       - name: Setup nasm
         uses: deep-soft/setup-nasm@v1
@@ -115,66 +106,25 @@ jobs:
         if: matrix.build_config  == 'Debug'
         run: Add-Content -Path $env:GITHUB_ENV -Value "DEBUG=1"
 
-      - name: create destination folders
-        if: inputs.patch_create_folders == true
+      - name: patch vcxproj or create destination folders
+        shell: bash
         run: |
           mkdir D:\a\UltraVNC\UltraVNC\Files\;
-
-          mkdir D:\a\UltraVNC\UltraVNC\uvnc;
-          
-          mkdir D:\a\UltraVNC\UltraVNC\uvnc\32;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\w2k;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\win8;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\xp;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp;
-
-          mkdir D:\a\UltraVNC\UltraVNC\uvnc\64;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\win8;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\XP;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp;
           mkdir D:\a\UltraVNC\UltraVNC\uvnc\repeater;
-
-      - name: patch vcxproj
-        if: inputs.patch_vcx == true
-        shell: bash
-        run: |
-          # set -x
           # sed -ibak "s/copy /xcopy /g" *.vc*
-          # find . -type f -name "*.vc*" -exec sed -i "s/copy /xcopy /g" "{}" \;
+          #find . -type f -name "*.vc*" -exec sed -i "s/copy /xcopy /g" "{}" \;
           # sed -i "s|c:\uvnc|D:\a\UltraVNC\UltraVNC\uvnc|g" *.vcx*
-
-          echo "FIND01-begin"
-          find . -type f -name "*.vcx*" -exec grep "c:\\\uvnc" "{}" \;
-          echo "FIND01-end"
-
-          find . -type f -name "*.vcx*" -exec sed -i "s|c:\\\uvnc|D:\\\a\\\UltraVNC\\\UltraVNC\\\uvnc|g" "{}" \;
-
-          echo "FIND02-begin"
-          find . -type f -name "*.vcx*" -exec grep "c:\\\uvnc" "{}" \;
-          echo "FIND02-end"
-
-          echo "FIND03-begin"
-          find . -type f -name "*.vcx*" -exec grep "C:\\\Users\\\rudi\\\Desktop\\\git_ultravnc\\\Files" "{}" \;
-          echo "FIND03-end"
-
-          find . -type f -name "*.vcx*" -exec sed -i "s|C:\\\Users\\\rudi\\\Desktop\\\git_ultravnc\\\Files|D:\\\a\\\UltraVNC\\\UltraVNC\\\Files|g" "{}" \;
-
-          echo "FIND04-begin"
-          find . -type f -name "*.vcx*" -exec grep "C:\\\Users\\\rudi\\\Desktop\\\git_ultravnc\\\Files" "{}" \;
-          echo "FIND04-end"
-
-          ls -l
-
-      - name: patch vcxproj signtool.exe path
-        if: inputs.patch_vcx_sign == true
-        shell: bash
-        run: |
-          # find . -type f -name "*.vcx*" -exec sed -i "s|8.1\\\bin\\\x86\\\signtool.exe|10\\\App Certification Kit\\\signtool.exe|g" "{}" \;
-          # find . -type f -name "*.vcx*" -exec sed -i "s|C:\\\Program Files (x86)\\\Windows Kits\\\8.1\\\bin\\\x86\\\signtool.exe|C:\\\Program Files (x86)\\\Windows Kits\\\10\\\App Certification Kit\\\signtool.exe|g" "{}" \;
-          find . -type f -name "*.vcx*" -exec sed -i "s|C:\\\Program Files (x86)\\\Windows Kits\\\8.1\\\bin\\\x86\\\signtool.exe|cmd /c echo |g" "{}" \;
+          find . -type f -name "*.vcx*" -exec sed -i "s|c:\uvnc|D:\a\UltraVNC\UltraVNC\uvnc|g" "{}" \;
 
       - name: Build (cl) vncviewer
         continue-on-error: true
@@ -183,7 +133,7 @@ jobs:
 
       - name: Create zip
         continue-on-error: true
-        working-directory: uvnc\${{ matrix.platform_name }}
+        working-directory: vncviewer\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
         run: |
           dir .\
           Compress-Archive . ..\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
@@ -194,7 +144,7 @@ jobs:
         uses: deep-soft/upload-artifact@main
         with:
           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-vncviewer.zip
-          path: uvnc\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-vncviewer.zip
+          path: vncviewer/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
 
       - name: Upload artifacts-vncviewer
         continue-on-error: true
@@ -205,7 +155,6 @@ jobs:
             .
             c:\uvnc
             D:\a\UltraVNC\UltraVNC\Files\
-            D:\a\UltraVNC\UltraVNC\uvnc\
             D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6
             D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU
             D:\a\UltraVNC\UltraVNC\uvnc\32\w2k
@@ -232,7 +181,7 @@ jobs:
 
       - name: Create zip
         continue-on-error: true
-        working-directory: uvnc\${{ matrix.platform_name }}
+        working-directory: winvnc\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
         run: |
           dir .\
           Compress-Archive . ..\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
@@ -243,7 +192,7 @@ jobs:
         uses: deep-soft/upload-artifact@main
         with:
           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-winvnc.zip
-          path: uvnc\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-winvnc.zip
+          path: winvnc/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
 
       - name: Upload artifacts-winvnc
         continue-on-error: true
@@ -271,20 +220,20 @@ jobs:
         shell: bash
         run: |
           list_file="${{ env.PRG_NAME }}.${{ matrix.build }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ matrix.platform_sln }}-${{ matrix.platform_name }}-${{ matrix.build_config }}.txt"
-          echo ":::ls -lR:::" > $list_file
-          pwd >> $list_file
-          ls -lR >> $list_file
-          echo "LIST_File=$list_file" >> $GITHUB_ENV
+          ls -lR > $list_file
+          ls -lR c:\uvnc >> $list_file
+          ls -lR D:\a\UltraVNC\UltraVNC\Files\ >> $list_file
+          echo "LIST_File=$list_file" >> GITHUB_ENV
 
       - name: Publish
         continue-on-error: true
-        uses: deep-soft/action-gh-release@v2.1
+        uses: deep-soft/action-gh-release@v1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}
           files: |
-            uvnc\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-vncviewer.zip
-            uvnc\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-winvnc.zip
+            vncviewer/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
+            winvnc/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
             ${{ env.LIST_File }}
 
       - name: Create zip_all
@@ -304,7 +253,7 @@ jobs:
 
       - name: Publish
         continue-on-error: true
-        uses: deep-soft/action-gh-release@v2.1
+        uses: deep-soft/action-gh-release@v1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}-ALL

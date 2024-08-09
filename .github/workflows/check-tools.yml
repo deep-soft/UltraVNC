@@ -1,0 +1,115 @@
+# 2023-09-03 08:00
+name: UVNC check tools
+
+on:
+  workflow_dispatch:    
+
+env:
+  PRG_NAME: "uvnc"
+  TAG_NAME: "uvnc-release"
+  TAG_BUILD: "-b"
+  TAG_REF: "0000000"
+  uvnc_version: "1.4.3.0"
+
+jobs:
+#------------------------------------------------------------------------------
+  check-tools:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [ 
+#                 msbuild_cl_x64_debug,
+                 msbuild_cl_x64_release,
+#                 msbuild_cl_x86_debug,
+                 msbuild_cl_x86_release,
+#                 msbuild_cl_ARM64_release,
+               ]
+  
+        include:
+#          - { build: msbuild_cl_x64_debug,     compiler: msbuild_cl, arch: amd64,       platform_sln: x64,   platform_name: x64,   build_config: Debug }
+          - { build: msbuild_cl_x64_release,   compiler: msbuild_cl, arch: amd64,       platform_sln: x64,   platform_name: x64,   build_config: Release }
+#          - { build: msbuild_cl_x86_debug,     compiler: msbuild_cl, arch: amd64_x86,   platform_sln: Win32, platform_name: x86,   build_config: Debug }
+          - { build: msbuild_cl_x86_release,   compiler: msbuild_cl, arch: amd64_x86,   platform_sln: Win32, platform_name: x86,   build_config: Release }
+#          - { build: msbuild_cl_ARM64_release, compiler: msbuild_cl, arch: amd64_arm64, platform_sln: ARM64, platform_name: ARM64, build_config: Release }
+
+    steps:
+
+      - name: run signtool.exe
+        continue-on-error: true
+        shell: cmd
+        run: |
+          echo "run 1 signtool.exe sign /?"
+          signtool.exe sign /?
+          echo "run C:\Program Files (x86)\Windows Kits\10\App Certification Kit\signtool.exe sign /?"
+          "C:\Program Files (x86)\Windows Kits\10\App Certification Kit\signtool.exe" sign /?
+
+      - name: add signtool.exe to PATH
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo ";C:\Program Files (x86)\Windows Kits\10\App Certification Kit;" >> $GITHUB_PATH
+
+      - name: run signtool.exe
+        continue-on-error: true
+        shell: cmd
+        run: |
+          echo "run 2 signtool.exe sign /?"
+          signtool.exe sign /?
+
+      - name: check SDK x86
+        if: ${{ matrix.build == 'msbuild_cl_x86_release' }}
+        continue-on-error: true
+        shell: cmd
+        run: |
+          dir "C:\Program Files (x86)\Windows Kits\"
+
+      - name: find signtool.exe x86
+        if: ${{ matrix.build == 'msbuild_cl_x86_release' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          pushd "/c/Program Files (x86)/Windows Kits/"
+          # find . -name signtool.exe
+          # signtool_exe=$(find . -name signtool.exe  | xargs readlink -f)
+          signtool_exe=$(find . -name signtool.exe)
+          echo "signtool: [$signtool_exe]"
+          if [ "$signtool_exe" != "" ]; then
+            signtool_exe_one=$(echo "$signtool_exe" | head -1)
+            echo "signtool_exe=$signtool_exe_one" >> $GITHUB_ENV
+          fi
+          popd
+
+      - name: check SDK x64
+        if: ${{ matrix.build == 'msbuild_cl_x64_release' }}
+        continue-on-error: true
+        shell: cmd
+        run: |
+          dir "C:\Program Files\Windows Kits\"
+
+      - name: find signtool.exe x64
+        if: ${{ matrix.build == 'msbuild_cl_x64_release' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          pushd "/c/Program Files/"
+          ls -la
+          # find . -name signtool.exe
+          # signtool_exe=$(find . -name signtool.exe  | xargs readlink -f)
+          signtool_exe=$(find . -name signtool.exe)
+          echo "signtool: [$signtool_exe]"
+          if [ "$signtool_exe" != "" ]; then
+            signtool_exe_one=$(echo "$signtool_exe" | head -1)
+            echo "signtool_exe=$signtool_exe_one" >> $GITHUB_ENV
+          fi
+          popd
+
+      - name: run signtool.exe
+        shell: cmd
+        run: |
+          echo "run signtool.exe sign /?"
+          signtool.exe sign /?
+          echo "run env.signtool_exe sign /?"
+          ${{ env.signtool_exe }} sign /?
+          echo "where signtool.exe"
+          where signtool.exe

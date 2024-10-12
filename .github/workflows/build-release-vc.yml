@@ -18,7 +18,7 @@ on:
       SED_STUFF:
         description: SED_STUFF
         type: boolean
-        default: false
+        default: true
         required: true
       SED_STUFF_PARAMS:
         description: SED_STUFF_PARAMS
@@ -37,7 +37,7 @@ env:
 jobs:
 #------------------------------------------------------------------------------
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
@@ -183,12 +183,6 @@ jobs:
           dir .
           popd
 
-      - name: Install Windows 8.1 SDK
-        shell: cmd
-        run: |
-          curl -L https://go.microsoft.com/fwlink/p/?LinkId=323507 --output sdksetup.exe
-          .\sdksetup /features + /q
-
       - name: Set MSVC environment
         uses: deep-soft/msvc-dev-cmd@v1
         with:
@@ -196,6 +190,12 @@ jobs:
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
+
+      - name: Install Windows 8.1 SDK
+        shell: cmd
+        run: |
+          curl -L https://go.microsoft.com/fwlink/p/?LinkId=323507 --output sdksetup.exe
+          .\sdksetup /features + /q
 
       - name: Setup nasm
         uses: deep-soft/setup-nasm@release/v1

@@ -122,7 +122,7 @@ jobs:
           echo ${{ env.VERSION }}
 
       - name: Install MSVC 2019 (v142) and Windows 8.1 SDK
-        if: ${{ InstallWithPowershell }}
+        if: ${{ inputs.InstallWithPowershell }}
         shell: powershell
         run: |
           # create list

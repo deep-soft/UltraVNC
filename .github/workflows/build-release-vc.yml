@@ -1,4 +1,4 @@
-# 2024-10-12 09:30
+# 2024-10-12 10:00
 # build-release-vc.yml
 # .github/workflows/build-release-vc.yml
 name: Build release VC
@@ -130,12 +130,13 @@ jobs:
 
       - name: Build (cl) vncviewer
         continue-on-error: true
-        working-directory: vncviewer
-        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} vncviewer.sln
+        working-directory: _build
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} vncviewer-build.sln
 
       - name: Create zip
         continue-on-error: true
-        working-directory: vncviewer\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
+#        working-directory: vncviewer\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
+        working-directory: _build
         run: |
           dir .\
           Compress-Archive . ..\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
@@ -146,7 +147,7 @@ jobs:
         uses: deep-soft/upload-artifact@v4
         with:
           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-vncviewer.zip
-          path: vncviewer/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
+          path: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
 
 #       - name: Upload artifacts-vncviewer
 #         continue-on-error: true
@@ -178,12 +179,12 @@ jobs:
 
       - name: Build (cl) winvnc
         continue-on-error: true
-        working-directory: winvnc
-        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} winvnc.sln
+        working-directory: _build
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} winvnc-build.sln
 
       - name: Create zip
         continue-on-error: true
-        working-directory: winvnc\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
+        working-directory: _build
         run: |
           dir .\
           Compress-Archive . ..\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
@@ -194,7 +195,7 @@ jobs:
         uses: deep-soft/upload-artifact@v4
         with:
           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-winvnc.zip
-          path: winvnc/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
+          path: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
 
 #       - name: Upload artifacts-winvnc
 #         continue-on-error: true
@@ -234,8 +235,8 @@ jobs:
           draft: true
           tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}
           files: |
-            vncviewer/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
-            winvnc/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
+            ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
+            ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
             ${{ env.LIST_File }}
 
       - name: Create zip_all

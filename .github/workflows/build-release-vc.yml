@@ -183,6 +183,12 @@ jobs:
           dir .
           popd
 
+      - name: Install Windows 8.1 SDK
+        shell: cmd
+        run: |
+          curl -L https://go.microsoft.com/fwlink/p/?LinkId=323507 --output sdksetup.exe
+          .\sdksetup /features + /q
+
       - name: Set MSVC environment
         uses: deep-soft/msvc-dev-cmd@v1
         with:

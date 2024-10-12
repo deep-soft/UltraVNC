@@ -131,7 +131,7 @@ jobs:
       - name: Build (cl) vncviewer
         continue-on-error: true
         working-directory: _build
-        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} vncviewer-build.sln
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} ..\vncviewer.sln
 
       - name: Create zip
         continue-on-error: true
@@ -180,7 +180,7 @@ jobs:
       - name: Build (cl) winvnc
         continue-on-error: true
         working-directory: _build
-        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} winvnc-build.sln
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} ..\winvnc.sln
 
       - name: Create zip
         continue-on-error: true

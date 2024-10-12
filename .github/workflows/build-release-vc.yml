@@ -1,0 +1,264 @@
+# 2024-10-12 09:30
+# build-release-vc.yml
+# .github/workflows/build-release-vc.yml
+name: Build release VC
+
+on:
+#  push:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+  workflow_dispatch:    
+
+env:
+  PRG_NAME: "uvnc"
+  TAG_NAME: "uvnc-release"
+  TAG_BUILD: "-b"
+  TAG_REF: "0000000"
+  uvnc_version: "1.5.0.2"
+
+jobs:
+#------------------------------------------------------------------------------
+  build:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [ 
+#                 msbuild_cl_x64_debug,
+                 msbuild_cl_x64_release,
+#                 msbuild_cl_x86_debug,
+                 msbuild_cl_x86_release,
+#                 msbuild_cl_ARM64_release,
+               ]
+  
+        include:
+#          - { build: msbuild_cl_x64_debug,     compiler: msbuild_cl, arch: amd64,       platform_sln: x64,   platform_name: x64,   build_config: Debug }
+          - { build: msbuild_cl_x64_release,   compiler: msbuild_cl, arch: amd64,       platform_sln: x64,   platform_name: x64,   build_config: Release }
+#          - { build: msbuild_cl_x86_debug,     compiler: msbuild_cl, arch: amd64_x86,   platform_sln: Win32, platform_name: x86,   build_config: Debug }
+          - { build: msbuild_cl_x86_release,   compiler: msbuild_cl, arch: amd64_x86,   platform_sln: Win32, platform_name: x86,   build_config: Release }
+#          - { build: msbuild_cl_ARM64_release, compiler: msbuild_cl, arch: amd64_arm64, platform_sln: ARM64, platform_name: ARM64, build_config: Release }
+
+    steps:
+      - name: Checkout source
+        uses: deep-soft/checkout@v4
+
+      - name: Get ref, set build version
+        shell: bash
+        run: |
+          _ref_all_=$(git log -1 --format='%H')
+          # _ref_=$(echo ${_ref_all_::7})
+          _ref_org_=${{ env.TAG_REF }}
+          _ref_len_="${#_ref_org_}"
+          _ref_=$(echo ${_ref_all_::$_ref_len_})
+          echo "TAG_REF=$_ref_" >> $GITHUB_ENV
+          _build_=${{ env.TAG_BUILD }}.$_ref_
+          echo "TAG_BUILD=$_build_" >> $GITHUB_ENV
+
+      - name: Print ref, build version
+        shell: bash
+        run: |
+          echo "REF: ${{ env.TAG_REF }}
+          echo "BLD: ${{ env.TAG_BUILD }}
+          echo "${{ env.TAG_NAME }}-${{ env.TAG_BUILD }}" > _tag_name_.txt
+
+      - name: Get program version
+        continue-on-error: false
+        shell: bash
+        run: |
+          set -x;
+          uvnc_version=${{ env.uvnc_Version}};
+          uvnc_build=${{ env.TAG_BUILD }};
+          #uvnc_build=$(cat "far/vbuild.m4");
+          #uvnc_build=$(grep -R "FILEVERSION " | grep winvnc/winvnc.rc | awk "{print $2}" | tr , .);
+
+          uvnc_APS_MAJORNUMBER=$(grep APS_MAJORNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_MINORNUMBER=$(grep APS_MINORNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_BUILDNUMBER=$(grep APS_BUILDNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_MODIFICATIONNUMBER=$(grep APS_MODIFICATIONNUMBER common/versionServerViewer.inc | awk '{print $3}');
+          uvnc_APS_DATEYEAR=$(grep APS_DATEYEAR common/versionServerViewer.inc | awk '{print $3}');
+
+          uvnc_version_rc=$uvnc_APS_MAJORNUMBER.$uvnc_APS_MINORNUMBER.$uvnc_APS_BUILDNUMBER.$uvnc_APS_MODIFICATIONNUMBER.$uvnc_APS_DATEYEAR;
+
+          if [ ! $uvnc_version_rc == "" ]; then
+            uvnc_version=$uvnc_version_rc;
+            echo "uvnc_version_rc=$uvnc_version_rc";
+          fi
+          echo $uvnc_version-$uvnc_build;
+          echo "VERSION=$uvnc_version-$uvnc_build" >> $GITHUB_ENV;
+
+      - name: Print program version
+        continue-on-error: false
+        shell: bash
+        run: |
+          echo "Print program version"
+          echo ${{ env.VERSION }}
+
+      - name: Set MSVC environment
+        uses: deep-soft/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Setup nasm
+        uses: deep-soft/setup-nasm@v1
+        with:
+          platform: ${{ matrix.platform.arch }}
+
+      - name: Set environment for debug build
+        if: matrix.build_config  == 'Debug'
+        run: Add-Content -Path $env:GITHUB_ENV -Value "DEBUG=1"
+
+#       - name: patch vcxproj or create destination folders
+#         shell: bash
+#         run: |
+#           mkdir D:\a\UltraVNC\UltraVNC\Files\;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\w2k;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\win8;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\xp;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\win8;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\XP;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp;
+#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\repeater;
+#           # sed -ibak "s/copy /xcopy /g" *.vc*
+#           #find . -type f -name "*.vc*" -exec sed -i "s/copy /xcopy /g" "{}" \;
+#           # sed -i "s|c:\uvnc|D:\a\UltraVNC\UltraVNC\uvnc|g" *.vcx*
+#           find . -type f -name "*.vcx*" -exec sed -i "s|c:\uvnc|D:\a\UltraVNC\UltraVNC\uvnc|g" "{}" \;
+
+      - name: Build (cl) vncviewer
+        continue-on-error: true
+        working-directory: vncviewer
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} vncviewer.sln
+
+      - name: Create zip
+        continue-on-error: true
+        working-directory: vncviewer\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
+        run: |
+          dir .\
+          Compress-Archive . ..\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
+          dir ..\
+
+      - name: Upload zip
+        continue-on-error: true
+        uses: deep-soft/upload-artifact@v4
+        with:
+          name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-vncviewer.zip
+          path: vncviewer/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
+
+#       - name: Upload artifacts-vncviewer
+#         continue-on-error: true
+#         uses: deep-soft/upload-artifact@v4
+#         with:
+#           name: artifacts-all-vncviewer
+#           path: |
+#             .
+#             c:\uvnc
+#             D:\a\UltraVNC\UltraVNC\Files\
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\w2k
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\win8
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\win8
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\XP
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp
+#             D:\a\UltraVNC\UltraVNC\uvnc\repeater
+
+#      - name: Upload folder
+#        continue-on-error: true
+#        uses: deep-soft/upload-artifact@v4
+#        with:
+#          name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}
+#          path: winvnc/_output/product/${{ matrix.build_config }}.${{ matrix.platform_sln }}
+
+      - name: Build (cl) winvnc
+        continue-on-error: true
+        working-directory: winvnc
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} winvnc.sln
+
+      - name: Create zip
+        continue-on-error: true
+        working-directory: winvnc\_output\product\${{ matrix.build_config }}.${{ matrix.platform_sln }}
+        run: |
+          dir .\
+          Compress-Archive . ..\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
+          dir ..\
+
+      - name: Upload zip
+        continue-on-error: true
+        uses: deep-soft/upload-artifact@v4
+        with:
+          name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-winvnc.zip
+          path: winvnc/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
+
+#       - name: Upload artifacts-winvnc
+#         continue-on-error: true
+#         uses: deep-soft/upload-artifact@v4
+#         with:
+#           name: artifacts-all-winvnc
+#           path: |
+#             .
+#             D:\a\UltraVNC\UltraVNC\uvnc\
+#             D:\a\UltraVNC\UltraVNC\Files\
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\w2k
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\win8
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp
+#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\win8
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\XP
+#             D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp
+#             D:\a\UltraVNC\UltraVNC\uvnc\repeater
+
+#       - name: Create list file
+#         continue-on-error: true
+#         shell: bash
+#         run: |
+#           list_file="${{ env.PRG_NAME }}.${{ matrix.build }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ matrix.platform_sln }}-${{ matrix.platform_name }}-${{ matrix.build_config }}.txt"
+#           ls -lR > $list_file
+#           ls -lR c:\uvnc >> $list_file
+#           ls -lR D:\a\UltraVNC\UltraVNC\Files\ >> $list_file
+#           echo "LIST_File=$list_file" >> GITHUB_ENV
+
+      - name: Publish
+        continue-on-error: true
+        uses: deep-soft/action-gh-release@v2.1
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}
+          files: |
+            vncviewer/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
+            winvnc/_output/product/${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
+            ${{ env.LIST_File }}
+
+      - name: Create zip_all
+        continue-on-error: true
+        working-directory: .\
+        run: |
+          dir .\
+          Compress-Archive . .\${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-ALL.zip
+          dir ..\
+
+#       - name: Upload zip
+#         continue-on-error: true
+#         uses: deep-soft/upload-artifact@v4
+#         with:
+#           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-ALL.zip
+#           path: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-ALL.zip
+
+      - name: Publish
+        continue-on-error: true
+        uses: deep-soft/action-gh-release@v1
+#            ${{ env.LIST_File }}
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}-ALL
+          files: |
+            ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-ALL.zip

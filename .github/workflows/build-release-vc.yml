@@ -149,8 +149,8 @@ jobs:
           # $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
           # $process = 
           Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
-          dir ./
-          Start-Process -FilePath cmd.exe /c "vs_BuildTools.exe modify --installPath `"$InstallPath`" $workloadArgs --quiet --norestart --nocache -Wait -PassThru -WindowStyle Hidden"
+          $Arguments = ('/c', "./vs_BuildTools.exe", 'export', '--config export.vsconfig', '--installPath', "`"$InstallPath`"",$workloadArgs, '--norestart', '--nocache')
+          Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
           dir ./
 
       - name: Set MSVC environment

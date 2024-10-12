@@ -100,7 +100,7 @@ jobs:
           arch: ${{ matrix.arch }}
 
       - name: Setup nasm
-        uses: deep-soft/setup-nasm@v1
+        uses: deep-soft/setup-nasm@release/v1
         with:
           platform: ${{ matrix.platform.arch }}
 

@@ -305,7 +305,7 @@ jobs:
         continue-on-error: true
         working-directory: .\
         run: |
-          iscc UltraVNC_installer_${{ matrix.platform_sln }}.iss
+          iscc UltraVNC_installer_${{ matrix.platform_name }}.iss
 
       - name: Publish
         continue-on-error: true

@@ -4,7 +4,7 @@
 #1
 S:#include "afxres.h"
 R:#include <windows.h>
-F: addon\ms-logon\authadm\authadmin.rc
+F:addon\ms-logon\authadm\authadmin.rc
 
 #2
 S:#include "afxres.h"

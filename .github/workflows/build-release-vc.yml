@@ -120,7 +120,35 @@ jobs:
         uses: deep-soft/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
-          toolset: 14.29
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install MSVC 2019 (v142) and Windows 8.1 SDK
+        shell: powershell
+        run: |
+          # create list
+          $componentsToAdd= @(
+            "Microsoft.VisualStudio.Component.VC.v141.ATL"
+            "Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL"
+            "Microsoft.VisualStudio.Component.VC.142"
+            "Microsoft.VisualStudio.Component.MSBuild.142"
+            "Microsoft.VisualStudio.Component.Windows81SDK"
+            "Microsoft.VisualStudio.Component.VC.ATLMFC"
+            "Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64"
+            "Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL"
+            "Microsoft.VisualStudio.Component.VC.14.29.16.11.MFC"
+            "Microsoft.VisualStudio.Component.VC.14.29.16.11.CLI.Support"
+          )
+          [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
+          $Arguments = ('/c', "./vs_BuildTools.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
+          # download vs_buildtools.exe
+          $VS_BTOOLS_EXE="vs_buildtools.exe"
+          $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
+          Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+          # should be run twice
+          $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+          $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
 
       - name: Setup nasm
         uses: deep-soft/setup-nasm@release/v1

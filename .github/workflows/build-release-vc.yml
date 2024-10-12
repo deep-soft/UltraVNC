@@ -166,16 +166,16 @@ jobs:
           curl -LOJ https://aka.ms/vs/17/release/vs_buildtools.exe
           dir .
           cmd /c vs_buildtools.exe ^
-          -add Microsoft.VisualStudio.Component.VC.v141.ATL ^
-          -add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
-          -add Microsoft.VisualStudio.Component.VC.142 ^
-          -add Microsoft.VisualStudio.Component.MSBuild.142 ^
-          -add Microsoft.VisualStudio.Component.Windows81SDK ^
-          -add Microsoft.VisualStudio.Component.VC.ATLMFC ^
-          -add Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64 ^
-          -add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
-          -add Microsoft.VisualStudio.Component.VC.14.29.16.11.MFC ^
-          -add Microsoft.VisualStudio.Component.VC.14.29.16.11.CLI.Support ^
+          --add Microsoft.VisualStudio.Component.VC.v141.ATL ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
+          --add Microsoft.VisualStudio.Component.VC.142 ^
+          --add Microsoft.VisualStudio.Component.MSBuild.142 ^
+          --add Microsoft.VisualStudio.Component.Windows81SDK ^
+          --add Microsoft.VisualStudio.Component.VC.ATLMFC ^
+          --add Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64 ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.MFC ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.CLI.Support ^
           --installPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" ^
           --quiet ^
           --norestart ^
@@ -218,30 +218,10 @@ jobs:
           vcpkg install zlib:x86-windows-static zstd:x86-windows-static libjpeg-turbo:x86-windows-static liblzma:x86-windows-static
           vcpkg integrate install
 
-#       - name: patch vcxproj or create destination folders
-#         shell: bash
-#         run: |
-#           mkdir D:\a\UltraVNC\UltraVNC\Files\;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\w2k;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\win8;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\xp;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\win8;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\XP;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp;
-#           mkdir D:\a\UltraVNC\UltraVNC\uvnc\repeater;
-#           # sed -ibak "s/copy /xcopy /g" *.vc*
-#           #find . -type f -name "*.vc*" -exec sed -i "s/copy /xcopy /g" "{}" \;
-#           # sed -i "s|c:\uvnc|D:\a\UltraVNC\UltraVNC\uvnc|g" *.vcx*
-#           find . -type f -name "*.vcx*" -exec sed -i "s|c:\uvnc|D:\a\UltraVNC\UltraVNC\uvnc|g" "{}" \;
-
       - name: Build (cl) vncviewer
         continue-on-error: true
-        working-directory: _build
-        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} ..\vncviewer\vncviewer.sln
+        # working-directory: _build
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} .\vncviewer\vncviewer.sln
 
       - name: Create zip
         continue-on-error: true
@@ -259,38 +239,10 @@ jobs:
           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-vncviewer.zip
           path: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-vncviewer.zip
 
-#       - name: Upload artifacts-vncviewer
-#         continue-on-error: true
-#         uses: deep-soft/upload-artifact@v4
-#         with:
-#           name: artifacts-all-vncviewer
-#           path: |
-#             .
-#             c:\uvnc
-#             D:\a\UltraVNC\UltraVNC\Files\
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\w2k
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\win8
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\win8
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\XP
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp
-#             D:\a\UltraVNC\UltraVNC\uvnc\repeater
-
-#      - name: Upload folder
-#        continue-on-error: true
-#        uses: deep-soft/upload-artifact@v4
-#        with:
-#          name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}
-#          path: winvnc/_output/product/${{ matrix.build_config }}.${{ matrix.platform_sln }}
-
       - name: Build (cl) winvnc
         continue-on-error: true
-        working-directory: _build
-        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} ..\winvnc\winvnc.sln
+        # working-directory: _build
+        run: msbuild -m /property:Configuration=${{ matrix.build_config }} /property:Platform=${{ matrix.platform_sln }} .\winvnc\winvnc.sln
 
       - name: Create zip
         continue-on-error: true
@@ -306,37 +258,6 @@ jobs:
         with:
           name: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_name }}.${{ env.VERSION }}-winvnc.zip
           path: ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-winvnc.zip
-
-#       - name: Upload artifacts-winvnc
-#         continue-on-error: true
-#         uses: deep-soft/upload-artifact@v4
-#         with:
-#           name: artifacts-all-winvnc
-#           path: |
-#             .
-#             D:\a\UltraVNC\UltraVNC\uvnc\
-#             D:\a\UltraVNC\UltraVNC\Files\
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\ipv6
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\oldCPU
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\w2k
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\win8
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp
-#             D:\a\UltraVNC\UltraVNC\uvnc\32\xp\xp
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\ipv6
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\win8
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\XP
-#             D:\a\UltraVNC\UltraVNC\uvnc\64\xp\xp
-#             D:\a\UltraVNC\UltraVNC\uvnc\repeater
-
-#       - name: Create list file
-#         continue-on-error: true
-#         shell: bash
-#         run: |
-#           list_file="${{ env.PRG_NAME }}.${{ matrix.build }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ matrix.platform_sln }}-${{ matrix.platform_name }}-${{ matrix.build_config }}.txt"
-#           ls -lR > $list_file
-#           ls -lR c:\uvnc >> $list_file
-#           ls -lR D:\a\UltraVNC\UltraVNC\Files\ >> $list_file
-#           echo "LIST_File=$list_file" >> GITHUB_ENV
 
       - name: Publish
         continue-on-error: true
@@ -373,3 +294,18 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}-ALL
           files: |
             ${{ env.PRG_NAME }}.${{ matrix.build_config }}.${{ matrix.platform_sln }}.${{ env.VERSION }}-ALL.zip
+
+      - name: Create installer
+        continue-on-error: true
+        working-directory: .\
+        run: |
+          iscc UltraVNC_installer_${{ matrix.platform_sln }}.iss
+
+      - name: Publish
+        continue-on-error: true
+        uses: deep-soft/action-gh-release@v2.1
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}-${{ env.VERSION }}
+          files: |
+            UltraVNC_*.exe

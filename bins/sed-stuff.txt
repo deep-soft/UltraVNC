@@ -1,0 +1,79 @@
+#BOF#
+# 2024.10.12 16:40
+
+#1
+S:#include "afxres.h"
+R:#include <windows.h>
+F: addon\ms-logon\authadm\authadmin.rc
+
+#2
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\authSSP\authSSP.rc
+
+#3
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\ldapauth9x\ldapAuth9x.rc
+
+#4
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\ldapauthNT4\ldapAuthnt4.rc
+
+#5
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\ldapauth\ldapAuth.rc
+
+#6
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\logging\logging.rc
+
+#7
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\MSLogonACL\MSLogonACL.rc
+
+#8
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\testauth\testauth.rc
+
+#9
+S:#include "afxres.h"
+R:#include <windows.h>
+F:addon\ms-logon\workgrpdomnt4\workgrpdomnt4.rc
+
+#10
+S:#include "afxres.h"
+R:#include <windows.h>
+F:DSMPlugin\MSRC4Plugin\crypto.rc
+
+#11
+S:#include "afxres.h"
+R:#include <windows.h>
+F:DSMPlugin\MSRC4Plugin\MSRC4Plugin.rc
+
+#12
+S:#include "afxres.h"
+R:#include <windows.h>
+F:DSMPlugin\TestPlugin\TestPlugin.rc
+
+#13
+S:#include "afxres.h"
+R:#include <windows.h>
+F:vncviewer\res\vncviewer.rc
+
+#14
+S:#include "afxres.h"
+R:#include <windows.h>
+F:winvnc\vnchooks\vnchooks.rc
+
+#15
+S:#include "afxres.h"
+R:#include <windows.h>
+F:winvnc\winvnc\winvnc.rc
+
+#EOF#

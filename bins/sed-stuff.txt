@@ -2,78 +2,32 @@
 # 2024.10.12 16:40
 
 #1
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\authadm\authadmin.rc
+S:SignTool=signtool
+R: 
+F:UltraVNC_installer_x64.iss
 
 #2
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\authSSP\authSSP.rc
+S:SignTool=signtool
+R: 
+F:UltraVNC_installer_x86.iss
 
-#3
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\ldapauth9x\ldapAuth9x.rc
-
-#4
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\ldapauthNT4\ldapAuthnt4.rc
-
-#5
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\ldapauth\ldapAuth.rc
-
-#6
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\logging\logging.rc
-
-#7
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\MSLogonACL\MSLogonACL.rc
-
-#8
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\testauth\testauth.rc
-
-#9
-S:#include "afxres.h"
-R:#include <windows.h>
-F:addon\ms-logon\workgrpdomnt4\workgrpdomnt4.rc
-
-#10
-S:#include "afxres.h"
-R:#include <windows.h>
-F:DSMPlugin\MSRC4Plugin\crypto.rc
-
-#11
-S:#include "afxres.h"
-R:#include <windows.h>
-F:DSMPlugin\MSRC4Plugin\MSRC4Plugin.rc
-
-#12
-S:#include "afxres.h"
-R:#include <windows.h>
-F:DSMPlugin\TestPlugin\TestPlugin.rc
-
-#13
-S:#include "afxres.h"
-R:#include <windows.h>
-F:vncviewer\res\vncviewer.rc
-
-#14
-S:#include "afxres.h"
-R:#include <windows.h>
-F:winvnc\vnchooks\vnchooks.rc
-
-#15
-S:#include "afxres.h"
-R:#include <windows.h>
-F:winvnc\winvnc\winvnc.rc
+#skip
+#S:#include "afxres.h"
+#R:#include <windows.h>
+#F:addon\ms-logon\authadm\authadmin.rc
+#F:addon\ms-logon\authSSP\authSSP.rc
+#F:addon\ms-logon\ldapauth9x\ldapAuth9x.rc
+#F:addon\ms-logon\ldapauthNT4\ldapAuthnt4.rc
+#F:addon\ms-logon\ldapauth\ldapAuth.rc
+#F:addon\ms-logon\logging\logging.rc
+#F:addon\ms-logon\MSLogonACL\MSLogonACL.rc
+#F:addon\ms-logon\testauth\testauth.rc
+#F:addon\ms-logon\workgrpdomnt4\workgrpdomnt4.rc
+#F:DSMPlugin\MSRC4Plugin\crypto.rc
+#F:DSMPlugin\MSRC4Plugin\MSRC4Plugin.rc
+#F:DSMPlugin\TestPlugin\TestPlugin.rc
+#F:vncviewer\res\vncviewer.rc
+#F:winvnc\vnchooks\vnchooks.rc
+#F:winvnc\winvnc\winvnc.rc
 
 #EOF#

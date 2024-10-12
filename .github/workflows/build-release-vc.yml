@@ -9,6 +9,16 @@ on:
 #  pull_request:
 #    branches: [ master ]
   workflow_dispatch:    
+    inputs:
+      SED_STUFF:
+        description: SED_STUFF
+        type: boolean
+        default: true
+        required: true
+      SED_STUFF_PARAMS:
+        description: SED_STUFF_PARAMS
+        default: "build.py"
+        required: true
 
 env:
   PRG_NAME: "uvnc"
@@ -45,24 +55,15 @@ jobs:
       - name: Checkout source
         uses: deep-soft/checkout@v4
 
-      - name: patch .rc (change afxres.h with windows.h)
+      - name: sed-stuff
+        if: ${{ inputs.SED_STUFF }}
+        continue-on-error: true
         shell: bash
-        run:
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/authadm/authadmin.rc           
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/authSSP/authSSP.rc             
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/ldapauth9x/ldapAuth9x.rc       
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/ldapauthNT4/ldapAuthnt4.rc     
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/ldapauth/ldapAuth.rc           
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/logging/logging.rc             
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/MSLogonACL/MSLogonACL.rc       
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/testauth/testauth.rc           
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  addon/ms-logon/workgrpdomnt4/workgrpdomnt4.rc 
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  DSMPlugin/MSRC4Plugin/crypto.rc               
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  DSMPlugin/MSRC4Plugin/MSRC4Plugin.rc          
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  DSMPlugin/TestPlugin/TestPlugin.rc            
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  vncviewer/res/vncviewer.rc                    
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  winvnc/vnchooks/vnchooks.rc                   
-          sed -i 's!#include \"afxres.h\"!#include <windows.h>!'  winvnc/winvnc/winvnc.rc                       
+        env:
+          DEBUG_MODE_1: ${{ inputs.DEBUG_MODE }}
+          DEBUG_MODE_2: ${{ inputs.DEBUG_MODE }}
+        run: |
+          bash bins/sed-stuff.sh "_" "${{ inputs.SED_STUFF_PARAMS }}"
 
       - name: Get ref, set build version
         shell: bash

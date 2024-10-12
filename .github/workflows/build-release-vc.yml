@@ -127,16 +127,14 @@ jobs:
         run: |
           # create list
           $componentsToAdd= @(
-            "Microsoft.VisualStudio.Component.VC.v141.ATL"
-            "Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL"
             "Microsoft.VisualStudio.Component.VC.142"
             "Microsoft.VisualStudio.Component.MSBuild.142"
             "Microsoft.VisualStudio.Component.Windows81SDK"
             "Microsoft.VisualStudio.Component.VC.ATLMFC"
-            "Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64"
             "Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL"
             "Microsoft.VisualStudio.Component.VC.14.29.16.11.MFC"
             "Microsoft.VisualStudio.Component.VC.14.29.16.11.CLI.Support"
+            "Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64"
           )
           [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
           Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
@@ -166,17 +164,35 @@ jobs:
           curl -LOJ https://aka.ms/vs/17/release/vs_buildtools.exe
           dir .
           cmd /c vs_buildtools.exe ^
-          --add Microsoft.VisualStudio.Component.VC.v141.ATL ^
-          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
           --add Microsoft.VisualStudio.Component.VC.142 ^
           --add Microsoft.VisualStudio.Component.MSBuild.142 ^
-          --add Microsoft.VisualStudio.Component.Windows81SDK ^
-          --add Microsoft.VisualStudio.Component.VC.ATLMFC ^
           --add Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64 ^
           --add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
           --add Microsoft.VisualStudio.Component.VC.14.29.16.11.MFC ^
           --add Microsoft.VisualStudio.Component.VC.14.29.16.11.CLI.Support ^
+          --add Microsoft.VisualStudio.Component.VC.ATLMFC ^
+          --add Microsoft.VisualStudio.Component.Windows81SDK ^
           --installPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" ^
+          --downloadThenInstall ^
+          --includeRecommended ^
+          --force ^
+          --quiet ^
+          --norestart ^
+          --nocache
+          dir .
+          cmd /c vs_buildtools.exe ^
+          --add Microsoft.VisualStudio.Component.VC.142 ^
+          --add Microsoft.VisualStudio.Component.MSBuild.142 ^
+          --add Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64 ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.MFC ^
+          --add Microsoft.VisualStudio.Component.VC.14.29.16.11.CLI.Support ^
+          --add Microsoft.VisualStudio.Component.VC.ATLMFC ^
+          --add Microsoft.VisualStudio.Component.Windows81SDK ^
+          --installPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" ^
+          --downloadThenInstall ^
+          --includeRecommended ^
+          --force ^
           --quiet ^
           --norestart ^
           --nocache

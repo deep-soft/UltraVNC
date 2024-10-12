@@ -13,7 +13,7 @@ on:
       SED_STUFF:
         description: SED_STUFF
         type: boolean
-        default: true
+        default: false
         required: true
       SED_STUFF_PARAMS:
         description: SED_STUFF_PARAMS
@@ -120,6 +120,7 @@ jobs:
         uses: deep-soft/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
+          toolset: 14.29
 
       - name: Setup nasm
         uses: deep-soft/setup-nasm@release/v1

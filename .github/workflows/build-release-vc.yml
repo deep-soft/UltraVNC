@@ -138,17 +138,18 @@ jobs:
           $Arguments = ('/c', "./vs_BuildTools.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
           echo "Arguments:"
           echo $Arguments
-          dir ./
           # download vs_buildtools.exe
           $VS_BTOOLS_EXE="vs_buildtools.exe"
           $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
           Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+          dir ./
           # should be run twice
           # $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
           # $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
           # $process = 
-          Start-Process -FilePath cmd.exe /c ./vs_BuildTools.exe modify --installPath "$InstallPath" $workloadArgs --quiet --norestart --nocache -Wait -PassThru -WindowStyle Hidden
-          Start-Process -FilePath cmd.exe /c ./vs_BuildTools.exe modify --installPath "$InstallPath" $workloadArgs --quiet --norestart --nocache -Wait -PassThru -WindowStyle Hidden
+          Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+          dir ./
+          Start-Process -FilePath "cmd.exe /c vs_BuildTools.exe modify --installPath `"$InstallPath`" $workloadArgs --quiet --norestart --nocache -Wait -PassThru -WindowStyle Hidden"
           dir ./
 
       - name: Set MSVC environment

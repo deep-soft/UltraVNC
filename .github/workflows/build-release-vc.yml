@@ -162,7 +162,7 @@ jobs:
       - name: Install MSVC 2019 (v142) and Windows 8.1 SDK
         shell: cmd
         run: |
-          cd "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+          pushd "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
           curl -LOJ https://aka.ms/vs/17/release/vs_buildtools.exe
           dir .
           cmd /c vs_buildtools.exe ^
@@ -181,6 +181,7 @@ jobs:
           --norestart ^
           --nocache
           dir .
+          popd
 
       - name: Set MSVC environment
         uses: deep-soft/msvc-dev-cmd@v1

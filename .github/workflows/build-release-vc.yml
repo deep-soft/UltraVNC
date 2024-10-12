@@ -336,7 +336,7 @@ jobs:
 
       - name: Publish
         continue-on-error: true
-        uses: deep-soft/action-gh-release@v1
+        uses: deep-soft/action-gh-release@v2.1
 #            ${{ env.LIST_File }}
         with:
           draft: true

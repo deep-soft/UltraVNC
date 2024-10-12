@@ -116,14 +116,6 @@ jobs:
           echo "Print program version"
           echo ${{ env.VERSION }}
 
-      - name: Set MSVC environment
-        uses: deep-soft/msvc-dev-cmd@v1
-        with:
-          arch: ${{ matrix.arch }}
-
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
-
       - name: Install MSVC 2019 (v142) and Windows 8.1 SDK
         shell: powershell
         run: |
@@ -142,6 +134,9 @@ jobs:
           )
           [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
           $Arguments = ('/c', "./vs_BuildTools.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
+          echo "Arguments:"
+          echo $Arguments
+          dir ./
           # download vs_buildtools.exe
           $VS_BTOOLS_EXE="vs_buildtools.exe"
           $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
@@ -149,6 +144,15 @@ jobs:
           # should be run twice
           $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
           $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+          dir ./
+
+      - name: Set MSVC environment
+        uses: deep-soft/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
 
       - name: Setup nasm
         uses: deep-soft/setup-nasm@release/v1

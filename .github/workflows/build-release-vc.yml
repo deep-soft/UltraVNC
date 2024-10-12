@@ -16,6 +16,8 @@ env:
   TAG_BUILD: "-b"
   TAG_REF: "0000000"
   uvnc_version: "1.5.0.2"
+  VCPKG_DIRECTORY: "C:\\vcpkg"
+  VCPKG_COMMIT_ID: "f7423ee180c4b7f40d43402c2feb3859161ef625"
 
 jobs:
 #------------------------------------------------------------------------------
@@ -107,6 +109,24 @@ jobs:
       - name: Set environment for debug build
         if: matrix.build_config  == 'Debug'
         run: Add-Content -Path $env:GITHUB_ENV -Value "DEBUG=1"
+
+      - name: Setup vcpkg with Github Actions binary cache
+        uses: deep-soft/run-vcpkg@v11
+        with:
+          vcpkgDirectory: ${{ env.VCPKG_DIRECTORY }}
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
+
+      - name: vcpkg x64
+        if: matrix.platform_name == 'x64'
+        run: |
+          vcpkg install zlib:x64-windows-static zstd:x64-windows-static libjpeg-turbo:x64-windows-static liblzma:x64-windows-static
+          vcpkg integrate install
+
+      - name: vcpkg x86
+        if: matrix.platform_name == 'x86'
+        run: |
+          vcpkg install zlib:x86-windows-static zstd:x86-windows-static libjpeg-turbo:x86-windows-static liblzma:x86-windows-static
+          vcpkg integrate install
 
 #       - name: patch vcxproj or create destination folders
 #         shell: bash

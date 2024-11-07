@@ -26,6 +26,7 @@ vcpkg install zstd:x64-mingw-static
 vcpkg install libjpeg-turbo:x64-mingw-static
 vcpkg install liblzma:x64-mingw-static
 vcpkg install openssl:x64-mingw-static
+vcpkg install libsodium:x64-mingw-static
 
 
 
@@ -68,7 +69,7 @@ git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
 
 
-# Developer Command Prompt for VS
+# x64 Native Tools Command Prompt for VS 2022
 
 cd /d c:\source\vcpkg
 bootstrap-vcpkg.bat -disableMetrics
@@ -88,6 +89,7 @@ vcpkg install zstd:x64-windows-static
 vcpkg install libjpeg-turbo:x64-windows-static
 vcpkg install liblzma:x64-windows-static
 vcpkg install openssl:x64-windows-static
+vcpkg install libsodium:x64-windows-static
 
 vcpkg integrate install
 

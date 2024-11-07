@@ -6,7 +6,8 @@ find_package(libjpeg-turbo CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(zstd CONFIG REQUIRED)
 find_package(LibLZMA REQUIRED)
-
+find_package(unofficial-sodium CONFIG REQUIRED)
+  
 set(${PROJECT_NAME}_SOURCES
     ../../DSMPlugin/DSMPlugin.cpp
     ../../ZipUnZip32/ZipUnzip32.cpp
@@ -26,6 +27,7 @@ set(${PROJECT_NAME}_SOURCES
     IPC.cpp
     LayeredWindows.cpp
     MouseSimulator.cpp
+	PropertiesDialog.cpp
     ScreenCapture.cpp
     SettingsManager.cpp
     TextChat.cpp
@@ -39,7 +41,6 @@ set(${PROJECT_NAME}_SOURCES
     getinfo.cpp
     inifile.cpp
     initipp.cpp
-    read_write_ini.cpp
     rfbRegion_X11.cxx
     rfbRegion_win32.cpp
     rfbUpdateTracker.cpp
@@ -80,8 +81,6 @@ set(${PROJECT_NAME}_SOURCES
     vnclog.cpp
     vncmenu.cpp
     vncntlm.cpp
-    vncproperties.cpp
-    vncpropertiesPoll.cpp
     vncserver.cpp
     vncsetauth.cpp
     vncsockconnect.cpp
@@ -106,6 +105,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE ZLIB::ZLIB
     PRIVATE zstd::libzstd
     PRIVATE LibLZMA::LibLZMA
+	PRIVATE unofficial-sodium::sodium
     libomnithread
     librdr
     libudtcloud

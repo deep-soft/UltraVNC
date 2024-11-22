@@ -52,6 +52,10 @@ public:
 
 	// adzm 2009-07-05 - Tray icon balloon tips
 	static void NotifyBalloon(wchar_t* szInfo, wchar_t* szTitle = NULL);
+	static void updateList();
+	static void updateMenu();
+	void updateUser(HWND hwnd);
+	static HMENU m_hmenu;
 
 protected:
 	// Tray icon handling
@@ -91,7 +95,6 @@ protected:
 	vncListDlg		m_ListDlg;
 
 	HWND			m_hwnd;
-	HMENU			m_hmenu;
 
 	NOTIFYICONDATAW	m_nid{};
 	omni_mutex		m_mutexTrayIcon; // adzm 2009-07-05
@@ -114,6 +117,7 @@ protected:
 	int IconFaultCounter;
 	bool balloonset = false;
 	wchar_t m_tooltip[128]{};
+	int authClientCount = -1;
 };
 
 

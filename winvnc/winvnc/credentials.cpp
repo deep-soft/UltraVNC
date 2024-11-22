@@ -30,6 +30,8 @@
 #include "SettingsManager.h"
 #include "credentials.h"
 
+DesktopUsersToken* DesktopUsersToken::instance = nullptr;
+
 DWORD Credentials::GetCurrentUserToken(HANDLE& process, HANDLE& Token)
 {
 	if (!settings->RunningFromExternalService()) {
@@ -130,17 +132,17 @@ bool Credentials::RunningAsAdministrator()
 	return (FALSE != fAdmin);
 }
 
+DesktopUsersToken* DesktopUsersToken::getInstance() {
+	if (instance == nullptr) {
+		instance = new DesktopUsersToken();
+	}
+	return instance;
+}
+
 DesktopUsersToken::DesktopUsersToken()
 {
 	hProcess = NULL;
 	hPToken = NULL;
-	DWORD dwExplorerLogonPid = processHelper::GetExplorerLogonPid();
-	if (dwExplorerLogonPid != 0) {
-		hProcess = OpenProcess(MAXIMUM_ALLOWED, FALSE, dwExplorerLogonPid);
-		OpenProcessToken(hProcess, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY
-			| TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_ADJUST_SESSIONID
-			| TOKEN_READ | TOKEN_WRITE, &hPToken);
-	}
 }
 
 DesktopUsersToken::~DesktopUsersToken()
@@ -153,5 +155,58 @@ DesktopUsersToken::~DesktopUsersToken()
 
 HANDLE DesktopUsersToken::getDesktopUsersToken()
 {
+	DWORD explorerLogonPid = processHelper::GetExplorerLogonPid();
+	
+	if (explorerLogonPid != 0 && dwExplorerLogonPid != explorerLogonPid) {
+		vnclog.Print(LL_INTWARN, VNCLOG("GetExplorerLogonPid %i\n"), explorerLogonPid);
+		hProcess = OpenProcess(MAXIMUM_ALLOWED, FALSE, explorerLogonPid);
+		if (hProcess == NULL) {
+			vnclog.Print(LL_INTWARN, VNCLOG("DesktopUsersToken failed OpenProcess error %i\n"), GetLastError());
+			return NULL;
+		}
+		if (!OpenProcessToken(hProcess, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY
+			| TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_ADJUST_SESSIONID
+			| TOKEN_READ | TOKEN_WRITE, &hPToken)) {
+			vnclog.Print(LL_INTWARN, VNCLOG("OpenProcessToken failed  %i\n"), GetLastError());
+			return NULL;
+		}
+	}
+	dwExplorerLogonPid = explorerLogonPid;
 	return hPToken;
+}
+
+bool DesktopUsersToken::GetConsoleUser(char* buffer, UINT size)
+{
+	HANDLE hPToken = DesktopUsersToken::getInstance()->getDesktopUsersToken();
+	if (hPToken == NULL) {
+		strcpy_s(buffer, UNLEN + 1, "");
+		return 0;
+	}
+
+	if (hPToken == save_hPtoken) {
+		strcpy_s(buffer, UNLEN + 1, username);
+		return strlen(username) != 0;
+	}
+
+	save_hPtoken = hPToken;
+	char aa[16384]{};
+	// token user
+	TOKEN_USER* ptu;
+	DWORD needed;
+	ptu = (TOKEN_USER*)aa;
+	if (GetTokenInformation(hPToken, TokenUser, ptu, 16384, &needed))
+	{
+		char  DomainName[64];
+		memset(DomainName, 0, sizeof(DomainName));
+		DWORD DomainSize;
+		DomainSize = sizeof(DomainName) - 1;
+		SID_NAME_USE SidType;
+		DWORD dwsize = size;
+		LookupAccountSid(NULL, ptu->User.Sid, buffer, &dwsize, DomainName, &DomainSize, &SidType);
+		strcpy_s(username, UNLEN + 1, buffer);
+		return 1;
+	}
+	strcpy_s(buffer, UNLEN + 1, "");
+	strcpy_s(username, UNLEN + 1, "");
+	return 0;
 }

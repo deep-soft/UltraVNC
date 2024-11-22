@@ -26,7 +26,7 @@
 #include <windows.h>
 #include <wtsapi32.h>
 #include "common/win32_helpers.h"
-#include "inifile.h"
+#include "common/inifile.h"
 #include "UltraVNCService.h"
 #include <userenv.h>
 
@@ -220,8 +220,6 @@ int UltraVNCService::install_service(void) {
 		}
 		if (myerror==ERROR_SERVICE_EXISTS)
 		{
-			//MessageBoxSecure(NULL, "Failed: Already exist",
-            //"UltraVNC", MB_ICONERROR);
 			CloseServiceHandle(scm);
 			return 1;
 		}
@@ -283,8 +281,6 @@ int UltraVNCService::uninstall_service(void) {
         return 1;
     }
     if(serviceStatus.dwCurrentState!=SERVICE_STOPPED) {
-        //MessageBoxSecure(NULL, "The service is still running, disable it first",
-        //    "UltraVNC", MB_ICONERROR);
         CloseServiceHandle(service);
         CloseServiceHandle(scm);
 		Sleep(2500);uninstall_service();
